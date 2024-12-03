@@ -6,42 +6,36 @@ import { danger, shToast, success } from "../modules/toast";
 const loginForm = document.querySelector("#login-form");
 
 loginForm.addEventListener("submit", async (e) => {
-
 	e.preventDefault();
 
 	const email = document.querySelector("#email").value.trim();
 	const password = document.querySelector("#password").value.trim();
 
 	if (!email || !password) {
-		console.log("Email and password are required.");
+		shToast("Email and password are required.", danger);
 		return;
 	}
 
 	try {
-
 		const response = await fetch('http://localhost/backend/server.php?action=login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ email, password })
-		})
+			body: JSON.stringify({ email, password }),
+		});
 
-		if (response.ok) {
-			const result = await response.json(); // Parse JSON response
-			// Store user's name in localStorage
+		const result = await response.json();
+
+		if (result.success) {
 			localStorage.setItem("userName", result.name);
-
-			loginForm.reset(); // Clear form fields
+			loginForm.reset();
 			window.location.href = "http://localhost:5173/index.html?toast=login-success";
 		} else {
-			const errorText = await response.text();
-			shToast(errorText, danger)
+			shToast(result.message, danger);
 		}
-
 	} catch (error) {
-		console.log(error)
+		shToast("An error occurred. Please try again later.", danger);
+		console.error(error);
 	}
-
-})
-
+});
